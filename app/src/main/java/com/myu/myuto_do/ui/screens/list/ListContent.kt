@@ -18,16 +18,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.myu.myuto_do.data.models.Priority
 import com.myu.myuto_do.data.models.ToDoTask
 import com.myu.myuto_do.ui.theme.*
+import com.myu.myuto_do.util.RequestState
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ListContent(
-    tasks: List<ToDoTask>,
+    allTasks: RequestState<List<ToDoTask>>,
     navigateToTaskScreen: (taskId: Int) -> Unit
 ) {
-    if (tasks.isEmpty()) {
-        EmptyContent()
-    } else {
-        DisplayTasks(tasks = tasks, navigateToTaskScreen = navigateToTaskScreen)
+
+    if (allTasks is RequestState.Success) {
+        HandleListContent(
+            tasks = allTasks.data,
+            navigateToTaskScreen = navigateToTaskScreen
+        )
     }
 }
 
@@ -47,6 +51,22 @@ fun DisplayTasks(
                 navigateToTaskScreen = navigateToTaskScreen
             )
         }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun HandleListContent(
+    tasks: List<ToDoTask>,
+    navigateToTaskScreen: (taskId: Int) -> Unit
+) {
+    if (tasks.isEmpty()) {
+        EmptyContent()
+    } else {
+        DisplayTasks(
+            tasks = tasks,
+            navigateToTaskScreen = navigateToTaskScreen
+        )
     }
 }
 
