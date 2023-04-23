@@ -19,21 +19,35 @@ import com.myu.myuto_do.data.models.Priority
 import com.myu.myuto_do.data.models.ToDoTask
 import com.myu.myuto_do.ui.theme.*
 import com.myu.myuto_do.util.RequestState
+import com.myu.myuto_do.util.SearchAppBarState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ListContent(
+    searchedTasks: RequestState<List<ToDoTask>>,
     allTasks: RequestState<List<ToDoTask>>,
+    searchAppBarState: SearchAppBarState,
     navigateToTaskScreen: (taskId: Int) -> Unit
 ) {
 
-    if (allTasks is RequestState.Success) {
-        HandleListContent(
-            tasks = allTasks.data,
-            navigateToTaskScreen = navigateToTaskScreen
-        )
+    if (searchAppBarState == SearchAppBarState.TRIGGERED) {
+        if (searchedTasks is RequestState.Success) {
+            HandleListContent(
+                tasks = searchedTasks.data,
+                navigateToTaskScreen = navigateToTaskScreen
+            )
+        }
+    } else {
+        if (allTasks is RequestState.Success) {
+            HandleListContent(
+                tasks = allTasks.data,
+                navigateToTaskScreen = navigateToTaskScreen
+            )
+        }
     }
+
 }
+
 
 @Composable
 fun DisplayTasks(
