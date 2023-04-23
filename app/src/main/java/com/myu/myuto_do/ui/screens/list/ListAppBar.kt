@@ -28,7 +28,6 @@ import com.myu.myuto_do.util.Action
 import com.myu.myuto_do.util.SearchAppBarState
 import com.myu.myuto_do.util.SearchAppBarState.CLOSED
 import com.myu.myuto_do.util.SearchAppBarState.OPENED
-import com.myu.myuto_do.util.TrailingIconState
 
 @Composable
 fun ListAppBar(
@@ -44,7 +43,7 @@ fun ListAppBar(
                 },
                 onSortClicked = { sharedViewModel.persistSortingState(priority = it) },
                 onDeleteAllClicked = {
-                    sharedViewModel.action.value = Action.DELETE_ALL
+                    sharedViewModel.updateAction(newAction = Action.DELETE_ALL)
                 },
             )
         }
@@ -149,37 +148,15 @@ fun SortAction(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    onSortClicked(Priority.HIGH)
+            Priority.values().slice(setOf(0, 2, 0)).forEach { priority ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onSortClicked(priority)
+                    }
+                ) {
+                    PriorityItem(priority = priority)
                 }
-            ) {
-                PriorityItem(priority = Priority.HIGH)
-            }
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    onSortClicked(Priority.MEDIUM)
-                }
-            ) {
-                PriorityItem(priority = Priority.MEDIUM)
-            }
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    onSortClicked(Priority.LOW)
-                }
-            ) {
-                PriorityItem(priority = Priority.LOW)
-            }
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    onSortClicked(Priority.NONE)
-                }
-            ) {
-                PriorityItem(priority = Priority.NONE)
             }
         }
 
@@ -227,8 +204,6 @@ fun SearchAppBar(
     onCloseClicked: () -> Unit,
     onSearchClicked: (String) -> Unit
 ) {
-    var trailingIconState by remember { mutableStateOf(TrailingIconState.READY_TO_DELETE) }
-
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -271,19 +246,10 @@ fun SearchAppBar(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        when (trailingIconState) {
-                            TrailingIconState.READY_TO_DELETE -> {
-                                onTextChange("")
-                                trailingIconState = TrailingIconState.READY_TO_CLOSE
-                            }
-                            TrailingIconState.READY_TO_CLOSE -> {
-                                if (text.isNotEmpty()) {
-                                    onTextChange("")
-                                } else {
-                                    onCloseClicked()
-                                    trailingIconState = TrailingIconState.READY_TO_DELETE
-                                }
-                            }
+                        if (text.isNotEmpty()) {
+                            onTextChange("")
+                        } else {
+                            onCloseClicked()
                         }
                     }
                 ) {
